@@ -2,15 +2,17 @@ import React,{useState,useRef,useEffect} from 'react'
 import {Todo} from './modeltodo'
 import  {AiFillEdit,AiFillDelete} from 'react-icons/ai'
 import {MdDone} from 'react-icons/md'
+import {Draggable} from 'react-beautiful-dnd'
 import './styles.css'
 
 
 interface Props{
+    index: number;
     todo: Todo;
     todos: Todo[];
     setTodos:  React.Dispatch<React.SetStateAction<Todo[]>>
 }
-const SingleTodo:React.FC<Props> = ({todo,todos,setTodos}) => {
+const SingleTodo:React.FC<Props> = ({todo,todos,setTodos,index}) => {
     const [edit,setEdit] = useState<boolean>(false) //if to edit the data or not 
     const [editTodo,setEditTodo] = useState<string>(todo.todo) //edited todo content.initiially contains the initial todo value
     //hence, here when the edit icon is clicked then the input element is shown and the content in input is assigend value as this, hence shows the current content of the todo.
@@ -51,7 +53,13 @@ useEffect(()=>{
     }
 
   return (
-    <form className='todos__single' onSubmit={(e)=>handleEdit(e,todo.id)}>
+    <Draggable draggableId={todo.id.toString()} index={index}> 
+     {
+        (provided,snapshot)=>(
+           <form className={`todos__single ${snapshot.isDragging ? 'drag' : ''}`} onSubmit={(e)=>handleEdit(e,todo.id)} //if its been dragging, add a style
+           ref={provided.innerRef}
+           {...provided.draggableProps}
+           {...provided.dragHandleProps}>
        { //if edit is true then show the input element there in place of the todo value, else show the real or striked todo
         edit ? (
             <input ref={inputRef} value={editTodo} onChange={(e)=>setEditTodo(e.target.value)}//edits the selected todo
@@ -79,6 +87,10 @@ useEffect(()=>{
         </span>
         </div>
     </form>
+        )
+     }
+    </Draggable>
+    
   )
 }
 
